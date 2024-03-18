@@ -6,7 +6,9 @@ This project is for learning Golang (with Gin-gonic)
 - How to Dockerize Golang application
 - How to CI/CD
 
-### Docker Build and Run
+## Build and Run
+
+### Docker
 
 ```
 docker build -t microsvc-dd:latest .
@@ -29,10 +31,18 @@ Run from built image
 docker compose up -d
 ```
 
-### Landing Page
+## Routes
+
+Health Check
 
 ```
-http://<CONTAINER-HOST-IP>
+http://<CONTAINER-HOST-IP>/healthz
+```
+
+Metrics
+
+```
+http://<CONTAINER-HOST-IP>/metrics
 ```
 
 ### Swagger
@@ -41,7 +51,7 @@ http://<CONTAINER-HOST-IP>
 http://<CONTAINER-HOST-IP>:<PORT>/swagger/index.html
 ```
 
-##### Environment Variable
+## Environment Variable
 
 | Variable name | Description      | Default | Mandatory |
 | ------------- | ---------------- | ------- | --------- |
