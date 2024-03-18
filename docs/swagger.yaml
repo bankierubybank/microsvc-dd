@@ -1,0 +1,17 @@
+info:
+  contact: {}
+paths:
+  /debug:
+    get:
+      consumes:
+      - application/json
+      description: Get debug information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get debug information
+      tags:
+      - debug
+swagger: "2.0"
