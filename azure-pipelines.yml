@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - main
+  - dev
+
+stages:
+  - stage: CI
+    pool:
+      # Use self-hosted agent to run pipeline
+      # https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/pool?view=azure-pipelines
+      # https://learn.microsoft.com/en-us/training/modules/host-build-agent/2-choose-a-build-agent
+      # name: "Azure-DO-Self-Hosted"
+      # demands:
+        # - Agent.Type -equals Linux # equals check for Agent.Type Linux; NOTE - This is user-defined capability
+      vmImage: ubuntu-latest # Name of the VM image you want to use; valid only in the Microsoft-hosted pool.
+    jobs:
+      - job: BuildAndPush
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: "nsthdso.azurecr.io"
+              repository: "microsvc-dd"
+              command: "buildAndPush"
+              Dockerfile: "**/Dockerfile"
