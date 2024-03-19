@@ -84,7 +84,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/tarots/{id}": {
+        "/tarots/{cardnumber}": {
             "get": {
                 "description": "Get a tarot card by ID",
                 "consumes": [
@@ -101,7 +101,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Tarot ID",
-                        "name": "id",
+                        "name": "cardnumber",
                         "in": "path",
                         "required": true
                     }
@@ -119,11 +119,10 @@ const docTemplate = `{
     },
     "definitions": {
         "models.TarotModel": {
+            "description": "Tarot Model",
             "type": "object",
             "required": [
                 "cardname",
-                "id",
-                "imageurl",
                 "number",
                 "type"
             ],
@@ -131,27 +130,17 @@ const docTemplate = `{
                 "cardname": {
                     "type": "string",
                     "maxLength": 255,
-                    "example": "string"
-                },
-                "id": {
-                    "type": "string",
-                    "maxLength": 15,
-                    "example": "string"
-                },
-                "imageurl": {
-                    "type": "string",
-                    "maxLength": 255,
-                    "example": "string"
+                    "example": "The Fool"
                 },
                 "number": {
                     "type": "string",
                     "maxLength": 15,
-                    "example": "string"
+                    "example": "0"
                 },
                 "type": {
                     "type": "string",
                     "maxLength": 63,
-                    "example": "string"
+                    "example": "major"
                 }
             }
         }

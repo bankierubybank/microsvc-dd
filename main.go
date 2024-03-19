@@ -18,11 +18,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//	@title			Microsvc-dd
-//	@version		0.1.0-rc
-//	@description	This is a sample API for learning microservices
-//	@host			localhost:8080
-//	@BasePath		/api/v1
+// @title			Microsvc-dd
+// @version		0.1.0-rc
+// @description	This is a sample API for learning microservices
+// @host			localhost:8080
+// @BasePath		/api/v1
 func main() {
 	router := gin.Default()
 	router.GET("/healthz", func(c *gin.Context) {
@@ -61,13 +61,13 @@ type buildInfo struct {
 	CommitURL      string `json:"commiturl"`
 }
 
-//	@Summary		Get debug information
-//	@Description	Get debug information
-//	@Tags			debug
-//	@Accept			json
-//	@Produce		json
-//	@Success		200
-//	@Router			/debug [get]
+// @Summary		Get debug information
+// @Description	Get debug information
+// @Tags			debug
+// @Accept			json
+// @Produce		json
+// @Success		200
+// @Router			/debug [get]
 func GetDebug(c *gin.Context) {
 	d := new(debugInfo)
 

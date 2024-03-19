@@ -7,36 +7,50 @@ import (
 
 // @Description Tarot Model
 type TarotModel struct {
-	ID       string `json:"id" binding:"required" example:"1" maxLength:"15"`
-	Type     string `json:"type" binding:"required" example:"major" maxLength:"63"`
 	Number   string `json:"number" binding:"required" example:"0" maxLength:"15"`
+	Type     string `json:"type" binding:"required" example:"major" maxLength:"63"`
 	CardName string `json:"cardname" binding:"required" example:"The Fool" maxLength:"255"`
-	ImageURL string `json:"imageurl" binding:"required" example:"https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg" maxLength:"255"`
 }
 
 var tarots = []TarotModel{
-	{ID: "1", Type: "major", Number: "0", CardName: "The Fool", ImageURL: "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg"},
-	{ID: "2", Type: "major", Number: "1", CardName: "The Magician", ImageURL: "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg"},
-	{ID: "3", Type: "major", Number: "2", CardName: "The High Priestess", ImageURL: "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg"},
-	{ID: "4", Type: "minor", Number: "1c", CardName: "Ace of Cups", ImageURL: "https://upload.wikimedia.org/wikipedia/commons/3/36/Cups01.jpg"},
-	{ID: "5", Type: "minor", Number: "2c", CardName: "Two of Cups", ImageURL: "https://upload.wikimedia.org/wikipedia/commons/f/f8/Cups02.jpg"},
+	{Number: "0", Type: "major", CardName: "The Fool"},
+	{Number: "1", Type: "major", CardName: "The Magician"},
+	{Number: "2", Type: "major", CardName: "The High Priestess"},
+	{Number: "3", Type: "major", CardName: "The Empress"},
+	{Number: "4", Type: "major", CardName: "The Emperor"},
+	{Number: "5", Type: "major", CardName: "The Hierophant"},
+	{Number: "6", Type: "major", CardName: "The Lovers"},
+	{Number: "7", Type: "major", CardName: "The Chariot"},
+	{Number: "8", Type: "major", CardName: "Strength"},
+	{Number: "9", Type: "major", CardName: "The Hermit"},
+	{Number: "10", Type: "major", CardName: "Wheel of Fortune"},
+	{Number: "11", Type: "major", CardName: "Justice"},
+	{Number: "12", Type: "major", CardName: "The Hanged Man"},
+	{Number: "13", Type: "major", CardName: "Death"},
+	{Number: "14", Type: "major", CardName: "Temperance"},
+	{Number: "15", Type: "major", CardName: "The Devil"},
+	{Number: "16", Type: "major", CardName: "The Tower"},
+	{Number: "17", Type: "major", CardName: "The Star"},
+	{Number: "18", Type: "major", CardName: "The Moon"},
+	{Number: "19", Type: "major", CardName: "The Sun"},
+	{Number: "20", Type: "major", CardName: "Judgement"},
+	{Number: "21", Type: "major", CardName: "The World"},
 }
 
 func GetTarots() ([]TarotModel, error) {
 	return tarots, nil
 }
 
-func GetTarotByID(id string) (TarotModel, error) {
-	// Loop over the list of tarot deck, looking for
-	// a tarot card whose ID value matches the parameter.
+func GetTarotByCardNumber(cardnumber string) (TarotModel, error) {
+	// Loop over the list of tarot deck, looking for a tarot card whose number value matches the parameter.
 	var tarot TarotModel
 	for _, a := range tarots {
-		if a.ID == id {
+		if a.Number == cardnumber {
 			tarot = a
 			return tarot, nil
 		}
 	}
-	return tarot, errors.New("tarot not found, is ID correct?")
+	return tarot, errors.New("tarot card not found, is card number correct?")
 }
 
 func GetRandomTarot() (TarotModel, error) {

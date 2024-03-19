@@ -9,7 +9,7 @@ import (
 
 func Tarots(g *gin.RouterGroup) {
 	g.GET("", GetTarots)
-	g.GET(":id", GetTarotByID)
+	g.GET(":cardnumber", GetTarotByCardNumber)
 	g.GET("/random", GetRandomTarot)
 }
 
@@ -22,26 +22,27 @@ func Tarots(g *gin.RouterGroup) {
 // @Success		200 {array}  models.TarotModel
 // @Router			/tarots/ [get]
 func GetTarots(c *gin.Context) {
-	us, _ := models.GetTarots()
-	c.JSON(http.StatusOK, us)
+	tarots, _ := models.GetTarots()
+	c.JSON(http.StatusOK, tarots)
 }
 
 // @Summary	Get a tarot card by ID
 // @Description	Get a tarot card by ID
 // @Tags			tarot
 // @Accept			json
-// @Param			id	path	int	true	"Tarot ID"
+// @Param			cardnumber	path	int	true	"Tarot ID"
 // @Produce		json
 // @Success		200 {object}  models.TarotModel
-// @Router			/tarots/{id} [get]
-func GetTarotByID(c *gin.Context) {
-	id := c.Param("id")
+// @failure      404 {string}  string
+// @Router			/tarots/{cardnumber} [get]
+func GetTarotByCardNumber(c *gin.Context) {
+	cardnumber := c.Param("cardnumber")
 
-	u, err := models.GetTarotByID(id)
+	tarot, err := models.GetTarotByCardNumber(cardnumber)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "tarot not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "tarot card not found, is card number correct?"})
 	}
-	c.JSON(http.StatusOK, u)
+	c.JSON(http.StatusOK, tarot)
 }
 
 // @Summary	Get a random tarot card
@@ -52,6 +53,6 @@ func GetTarotByID(c *gin.Context) {
 // @Success		200 {object}  models.TarotModel
 // @Router			/tarots/random [get]
 func GetRandomTarot(c *gin.Context) {
-	u, _ := models.GetRandomTarot()
-	c.JSON(http.StatusOK, u)
+	tarot, _ := models.GetRandomTarot()
+	c.JSON(http.StatusOK, tarot)
 }

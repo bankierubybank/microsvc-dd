@@ -1,31 +1,22 @@
 basePath: /api/v1
 definitions:
   models.TarotModel:
+    description: Tarot Model
     properties:
       cardname:
-        example: string
-        maxLength: 255
-        type: string
-      id:
-        example: string
-        maxLength: 15
-        type: string
-      imageurl:
-        example: string
+        example: The Fool
         maxLength: 255
         type: string
       number:
-        example: string
+        example: "0"
         maxLength: 15
         type: string
       type:
-        example: string
+        example: major
         maxLength: 63
         type: string
     required:
     - cardname
-    - id
-    - imageurl
     - number
     - type
     type: object
@@ -66,7 +57,7 @@ paths:
       summary: Get all tarot cards
       tags:
       - tarot
-  /tarots/{id}:
+  /tarots/{cardnumber}:
     get:
       consumes:
       - application/json
@@ -74,7 +65,7 @@ paths:
       parameters:
       - description: Tarot ID
         in: path
-        name: id
+        name: cardnumber
         required: true
         type: integer
       produces:
