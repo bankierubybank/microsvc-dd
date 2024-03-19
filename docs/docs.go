@@ -34,18 +34,127 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tarots/": {
+            "get": {
+                "description": "Get all tarot cards",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get all tarot cards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TarotModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tarots/random": {
+            "get": {
+                "description": "Get a random tarot card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get a random tarot card",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TarotModel"
+                        }
+                    }
+                }
+            }
+        },
+        "/tarots/{cardnumber}": {
+            "get": {
+                "description": "Get a tarot card by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get a tarot card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tarot ID",
+                        "name": "cardnumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TarotModel"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.TarotModel": {
+            "description": "Tarot Model",
+            "type": "object",
+            "required": [
+                "cardname",
+                "number",
+                "type"
+            ],
+            "properties": {
+                "cardname": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "The Fool"
+                },
+                "number": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "example": "0"
+                },
+                "type": {
+                    "type": "string",
+                    "maxLength": 63,
+                    "example": "major"
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "0.1.0-rc",
+	Host:             "localhost:8080",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Microsvc-dd",
+	Description:      "This is a sample API for learning microservices",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

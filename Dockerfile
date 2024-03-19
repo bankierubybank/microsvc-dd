@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o /microsvc-dd main.go
+RUN go build -o /microsvc-dd
 
 ## Deploy
 FROM gcr.io/distroless/base-debian10:debug

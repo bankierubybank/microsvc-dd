@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bankierubybank/microsvc-dd/docs"
+	"github.com/bankierubybank/microsvc-dd/routes"
 
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -17,6 +18,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// @title			Microsvc-dd
+// @version		0.1.0-rc
+// @description	This is a sample API for learning microservices
+// @host			localhost:8080
+// @BasePath		/api/v1
 func main() {
 	router := gin.Default()
 	router.GET("/healthz", func(c *gin.Context) {
@@ -32,6 +38,7 @@ func main() {
 		{
 			debugRouter.GET("", GetDebug)
 		}
+		routes.Tarots(v1.Group("/tarots"))
 	}
 	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT"))) // listen and serve on 0.0.0.0:$PORT
 }
@@ -54,15 +61,13 @@ type buildInfo struct {
 	CommitURL      string `json:"commiturl"`
 }
 
-// @BasePath	/api/v1
 // @Summary		Get debug information
-// @Schemes
 // @Description	Get debug information
-// @Tags		debug
-// @Accept		json
+// @Tags			debug
+// @Accept			json
 // @Produce		json
 // @Success		200
-// @Router		/debug [get]
+// @Router			/debug [get]
 func GetDebug(c *gin.Context) {
 	d := new(debugInfo)
 
