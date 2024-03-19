@@ -1,5 +1,40 @@
+basePath: /api/v1
+definitions:
+  models.TarotModel:
+    properties:
+      cardname:
+        example: string
+        maxLength: 255
+        type: string
+      id:
+        example: string
+        maxLength: 15
+        type: string
+      imageurl:
+        example: string
+        maxLength: 255
+        type: string
+      number:
+        example: string
+        maxLength: 15
+        type: string
+      type:
+        example: string
+        maxLength: 63
+        type: string
+    required:
+    - cardname
+    - id
+    - imageurl
+    - number
+    - type
+    type: object
+host: localhost:8080
 info:
   contact: {}
+  description: This is a sample API for learning microservices
+  title: Microsvc-dd
+  version: 0.1.0-rc
 paths:
   /debug:
     get:
@@ -14,4 +49,57 @@ paths:
       summary: Get debug information
       tags:
       - debug
+  /tarots/:
+    get:
+      consumes:
+      - application/json
+      description: Get all tarot cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TarotModel'
+            type: array
+      summary: Get all tarot cards
+      tags:
+      - tarot
+  /tarots/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a tarot card by ID
+      parameters:
+      - description: Tarot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TarotModel'
+      summary: Get a tarot card by ID
+      tags:
+      - tarot
+  /tarots/random:
+    get:
+      consumes:
+      - application/json
+      description: Get a random tarot card
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TarotModel'
+      summary: Get a random tarot card
+      tags:
+      - tarot
 swagger: "2.0"

@@ -1,8 +1,13 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a sample API for learning microservices",
+        "title": "Microsvc-dd",
+        "contact": {},
+        "version": "0.1.0-rc"
     },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
     "paths": {
         "/debug": {
             "get": {
@@ -21,6 +26,126 @@
                     "200": {
                         "description": "OK"
                     }
+                }
+            }
+        },
+        "/tarots/": {
+            "get": {
+                "description": "Get all tarot cards",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get all tarot cards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TarotModel"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tarots/random": {
+            "get": {
+                "description": "Get a random tarot card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get a random tarot card",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TarotModel"
+                        }
+                    }
+                }
+            }
+        },
+        "/tarots/{id}": {
+            "get": {
+                "description": "Get a tarot card by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tarot"
+                ],
+                "summary": "Get a tarot card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tarot ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TarotModel"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.TarotModel": {
+            "type": "object",
+            "required": [
+                "cardname",
+                "id",
+                "imageurl",
+                "number",
+                "type"
+            ],
+            "properties": {
+                "cardname": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "example": "string"
+                },
+                "imageurl": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "example": "string"
+                },
+                "number": {
+                    "type": "string",
+                    "maxLength": 15,
+                    "example": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "maxLength": 63,
+                    "example": "string"
                 }
             }
         }
