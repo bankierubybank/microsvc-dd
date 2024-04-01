@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  app:
+    container_name: microsvc-dd
+    image: bankierubybank/microsvc-dd:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+    ports:
+      - 8080:8080
+    environment:
+      PORT: 8080
+      NAMESPACE: 'N/A'
+      NODENAME: 'local'
