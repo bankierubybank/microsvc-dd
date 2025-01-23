@@ -1,0 +1,21 @@
+# Ref: https://docs.docker.com/build/building/context/#dockerignore-files
+
+# Ignore Git
+.gitignore
+.git
+
+# Ignore compose file
+docker-compose.yml
+
+# Ignore CI script
+Jenkinsfile
+.gitlab/
+.gitlab-ci.yml
+.github/
+
+# Ignore deployment manifests
+deployment/
+
+# Ignore .md files and screenshots
+screenshots/
+*.md

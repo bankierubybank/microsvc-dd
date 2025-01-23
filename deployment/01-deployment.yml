@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tarot-api
+  labels:
+    app: tarot-api
+  annotations:
+    app.kubernetes.io/component: "api"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tarot-api
+  template:
+    metadata:
+      labels:
+        app: tarot-api
+    spec:
+      containers:
+        - name: tarot-api
+          image: tarot-api:latest
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODENAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 60
+          redinessProbe:
+            ttpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 60
+          securityContext:
+            runAsUser: 1000699999
+            runAsGroup: 1000699999
+      # securityContext:
+      #   fsGroup: 1000699999
+      # imagePullSecrets:
+      #   - name: nexus.lab

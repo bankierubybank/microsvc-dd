@@ -26,8 +26,11 @@ go.work
 # Terraform files to ignore
 # Local .terraform directories
 **/.terraform/*
-.terraform          # Terraform cache
-*.tfstate           # a plaintext Terraform state file
+# Terraform cache
+.terraform
+.terraform.lock.hcl
+# a plaintext Terraform state file
+*.tfstate
 *.tfstate.backup
 *.tfstate.lock.*
 
