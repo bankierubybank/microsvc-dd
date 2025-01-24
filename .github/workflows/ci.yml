@@ -45,7 +45,11 @@ jobs:
           ignore-unfixed: true # optional, default is false
           severity: HIGH,CRITICAL # optional, default is UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
         continue-on-error: true
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: $bankierubybank
+          password: ${{ secrets.DOCKER_HUB_PAT }}
       - name: Push image to registry (Docker Hub)
         run: |
-          echo ${{ secrets.DOCKER_HUB_PAT }} | docker login -u bankierubybank --password-stdin
           docker push bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}
