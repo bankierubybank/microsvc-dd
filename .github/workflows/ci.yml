@@ -47,5 +47,5 @@ jobs:
         continue-on-error: true
       - name: Push image to registry (Docker Hub)
         run: |
-          docker login -u bankierubybank -p ${{ secrets.DOCKER_HUB_PAT }}
+          echo ${{ secrets.DOCKER_HUB_PAT }} | docker login -u bankierubybank --password-stdin
           docker push bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}
