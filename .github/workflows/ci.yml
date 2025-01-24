@@ -36,14 +36,16 @@ jobs:
         id: set-image-tag
         run: echo "IMAGE_TAG=$([[ ${{ github.ref }} == 'refs/heads/main' ]] && echo '${{ github.run_number }}' || echo 'dev')" >> $GITHUB_ENV
       - name: Build the Docker image
-        run: docker build ./tarot --file ./tarot/Dockerfile --tag my-image-name:${{ env.IMAGE_TAG }}
+        run: docker build ./tarot --file ./tarot/Dockerfile --tag bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}
       - name: Aqua Security Trivy
         uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: image
-          image-ref: "my-image-name:${{ env.IMAGE_TAG }}"
+          image-ref: "bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}"
           ignore-unfixed: true # optional, default is false
           severity: HIGH,CRITICAL # optional, default is UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
         continue-on-error: true
       - name: Push image to registry (Docker Hub)
-        run: echo "Pushing my-image-name:${{ env.IMAGE_TAG }} to Docker Hub"
+        run: |
+          docker login -u bankierubybank -p ${{ secrets.DOCKER_HUB_PAT }}
+          docker push bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}
