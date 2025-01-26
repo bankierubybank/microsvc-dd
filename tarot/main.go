@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -16,6 +18,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type debugInfo struct {
@@ -41,19 +50,65 @@ var (
 	CIRunNumber = "N/A"
 )
 
+func initTracer() (*sdktrace.TracerProvider, error) {
+	// Set the OTLP endpoint
+	otlpEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+
+	// Create the OTLP exporter
+	client := otlptracehttp.NewClient(
+		otlptracehttp.WithEndpoint(otlpEndpoint),
+		otlptracehttp.WithInsecure(), // Use this if the endpoint is not secured with TLS
+	)
+	exporter, err := otlptrace.New(context.Background(), client)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the tracer provider
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	return tp, nil
+}
+
 // @title			Microsvc-dd
-// @version		0.1.0-rc
+// @version		0.1.1-rc
 // @description	This is a sample API for learning microservices
 // @host			localhost:8080
 // @BasePath		/api/v1
 func main() {
+	// Initialize OpenTelemetry tracer provider
+	tp, err := initTracer()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}()
+
 	router := gin.Default()
+
+	// Health check endpoint
 	router.GET("/healthz", func(c *gin.Context) {
 		c.String(200, "OK")
 	})
+
+	// Prometheus metrics endpoint
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	// Swagger documentation
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	// OpenTelemetry middleware
+	router.Use(otelgin.Middleware("my-server"))
+
+	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
 

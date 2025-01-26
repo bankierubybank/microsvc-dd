@@ -17,4 +17,4 @@ services:
       PORT: 8080
       NAMESPACE: 'N/A'
       NODENAME: 'local'
-      # CIRunNumber: 'N/A'
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318'
