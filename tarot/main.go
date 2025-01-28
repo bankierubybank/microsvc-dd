@@ -77,7 +77,6 @@ func initTracer() (*sdktrace.TracerProvider, error) {
 // @title			Microsvc-dd
 // @version		0.1.1-rc
 // @description	This is a sample API for learning microservices
-// @host			localhost:8080
 // @BasePath		/api/v1
 func main() {
 	// Initialize OpenTelemetry tracer provider
