@@ -38,7 +38,7 @@ jobs:
         run: echo "IMAGE_TAG=$([[ ${{ github.ref }} == 'refs/heads/main' ]] && echo '${{ github.run_number }}' || echo 'dev')" >> $GITHUB_ENV
       - name: Update Swagger
         run: |
-          go install github.com/swaggo/swag/cmd/swag
+          go install github.com/swaggo/swag/cmd/swag@latest
           swag init -g ./tarot/main.go -o ./tarot/docs
       - name: Build the Docker image
         run: docker build ./tarot --file ./tarot/Dockerfile --tag bankierubybank/microsvc-dd:${{ env.IMAGE_TAG }}
