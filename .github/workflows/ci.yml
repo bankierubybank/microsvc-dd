@@ -38,6 +38,7 @@ jobs:
         run: echo "IMAGE_TAG=$([[ ${{ github.ref }} == 'refs/heads/main' ]] && echo '${{ github.run_number }}' || echo 'dev')" >> $GITHUB_ENV
       - name: Update Swagger
         run: |
+          export PATH=$(go env GOPATH)/bin:$PATH
           go install github.com/swaggo/swag/cmd/swag@latest
           swag init -g ./tarot/main.go -o ./tarot/docs
       - name: Build the Docker image
