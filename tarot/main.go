@@ -12,6 +12,7 @@ import (
 
 	"github.com/bankierubybank/microsvc-dd/tarot/docs"
 	"github.com/bankierubybank/microsvc-dd/tarot/routes"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -19,11 +20,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -46,49 +49,66 @@ type buildInfo struct {
 	CIRunNumber    string `json:"cirunnumber"`
 }
 
-var (
-	CIRunNumber = "N/A"
-)
-
-func initTracer() (*sdktrace.TracerProvider, error) {
-	// Set the OTLP endpoint
-	otlpEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-
-	// Create the OTLP exporter
-	client := otlptracehttp.NewClient(
-		otlptracehttp.WithEndpoint(otlpEndpoint),
-		otlptracehttp.WithInsecure(), // Use this if the endpoint is not secured with TLS
-	)
-	exporter, err := otlptrace.New(context.Background(), client)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create the tracer provider
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter),
-	)
-	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	return tp, nil
+type errorInfo struct {
+	ErrorCode int    `json:"errorcode"`
+	ErrorMesg string `json:"errormesg"`
 }
 
-// @title			Microsvc-dd
-// @version		0.1.1-rc
-// @description	This is a sample API for learning microservices
-// @BasePath		/api/v1
-func main() {
-	// Initialize OpenTelemetry tracer provider
-	tp, err := initTracer()
+var (
+	CIRunNumber  = "N/A"
+	serviceName  = os.Getenv("SERVICE_NAME")
+	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	insecure     = os.Getenv("INSECURE_MODE")
+)
+
+// Ref: https://opentelemetry.io/docs/languages/go/getting-started/
+func initTracer() func(context.Context) error {
+
+	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
+	if len(insecure) > 0 {
+		secureOption = otlptracegrpc.WithInsecure()
+	}
+
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracegrpc.NewClient(
+			secureOption,
+			otlptracegrpc.WithEndpoint(collectorURL),
+		),
+	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			log.Printf("Error shutting down tracer provider: %v", err)
-		}
-	}()
+	resources, err := resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			attribute.String("service.name", serviceName),
+			attribute.String("library.language", "go"),
+		),
+	)
+	if err != nil {
+		log.Printf("Could not set resources: ", err)
+	}
+
+	otel.SetTracerProvider(
+		sdktrace.NewTracerProvider(
+			sdktrace.WithSampler(sdktrace.AlwaysSample()),
+			sdktrace.WithBatcher(exporter),
+			sdktrace.WithResource(resources),
+		),
+	)
+	return exporter.Shutdown
+}
+
+// @title		Microsvc-dd
+// @version		0.1.1-rc
+// @description	This is a sample API for learning microservices
+// @BasePath	/api/v1
+func main() {
+	// Initialize OpenTelemetry tracer provider
+	cleanup := initTracer()
+	defer cleanup(context.Background())
 
 	router := gin.Default()
 
@@ -105,7 +125,7 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// OpenTelemetry middleware
-	router.Use(otelgin.Middleware("my-server"))
+	router.Use(otelgin.Middleware(serviceName))
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
@@ -122,36 +142,56 @@ func main() {
 
 // @Summary		Get debug information
 // @Description	Get debug information
-// @Tags			debug
-// @Accept			json
+// @Tags		debug
+// @Accept		json
 // @Produce		json
-// @Success		200
-// @Router			/debug [get]
+// @Success		200 {object} debugInfo
+// @Failure		500 {object} errorInfo
+// @Router		/debug [get]
 func GetDebug(c *gin.Context) {
-	d := new(debugInfo)
-
-	d.RuntimeInfo.Hostname = os.Getenv("HOSTNAME")
-
-	uname, unameErr := (exec.Command("uname", "-a")).Output()
-	if unameErr == nil {
-		d.RuntimeInfo.UName = strings.TrimRight(string(uname), "\n")
+	d, err := createDebugInfo()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorInfo{
+			ErrorCode: http.StatusInternalServerError,
+			ErrorMesg: err.Error(),
+		})
+		return
 	}
 
-	d.RuntimeInfo.K8Snode = os.Getenv("NODENAME")
-	d.RuntimeInfo.K8Snamespace = os.Getenv("NAMESPACE")
+	c.JSON(http.StatusOK, d)
+}
+
+// createDebugInfo creates and populates a debugInfo struct.
+func createDebugInfo() (*debugInfo, error) {
+	d := &debugInfo{
+		RuntimeInfo: runtimeInfo{
+			Hostname:     os.Getenv("HOSTNAME"),
+			K8Snode:      os.Getenv("NODENAME"),
+			K8Snamespace: os.Getenv("NAMESPACE"),
+		},
+	}
+
+	uname, err := exec.Command("uname", "-a").Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get uname information: %w", err)
+	}
+	d.RuntimeInfo.UName = strings.TrimRight(string(uname), "\n")
 
 	if info, ok := debug.ReadBuildInfo(); ok {
 		d.BuildInfo.GoBuildVersion = info.GoVersion
 		for _, setting := range info.Settings {
-			if setting.Key == "vcs" {
+			switch setting.Key {
+			case "vcs":
 				d.BuildInfo.VCS = setting.Value
-			}
-			if setting.Key == "vcs.revision" {
+			case "commit":
 				d.BuildInfo.Commit = setting.Value
-				d.BuildInfo.CommitURL = "https://github.com/bankierubybank/microsvc-dd/commit/" + setting.Value
+			case "commiturl":
+				d.BuildInfo.CommitURL = setting.Value
 			}
 		}
-		d.BuildInfo.CIRunNumber = CIRunNumber
+	} else {
+		return nil, fmt.Errorf("failed to read build information")
 	}
-	c.JSON(http.StatusOK, d)
+
+	return d, nil
 }
